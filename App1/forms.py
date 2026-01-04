@@ -43,7 +43,19 @@ class AddTeamForm(forms.ModelForm):
     class Meta:
         model = Team
         fields = ['name']
-        labels = {'name': 'שם הקבוצה החדשה'}
+        labels = {'name': 'name of the new team'}
+
+
+#class JoinTeamForm(forms.ModelForm):
+#   team = forms.ModelChoiceField(queryset=Team.objects.all(), label="select team")
 
 class JoinTeamForm(forms.ModelForm):
-    team = forms.ModelChoiceField(queryset=Team.objects.all(), label="בחר קבוצה להצטרפות")
+    team = forms.ModelChoiceField(
+        queryset=Team.objects.all(),
+        label="select a team",
+        empty_label="--choose teem to join",
+        widget=forms.Select(attrs={'class':'form-control'})
+    )
+    class Meta:
+        model = User
+        fields = ['team']

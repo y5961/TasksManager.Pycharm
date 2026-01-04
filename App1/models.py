@@ -6,13 +6,15 @@ from django.core.validators import MinLengthValidator
 
 
 class User(AbstractUser):
-    role = models.CharField(choices=[("Manager",",Manager"),("TeamMember","TeamMember")])
+    role = models.CharField(choices=[("Manager","Manager"),("TeamMember","TeamMember")])
     team = models.ForeignKey("Team", on_delete=models.CASCADE, null=True)
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
 class Team(models.Model):
     name = models.CharField(max_length=100,unique=True)
+    def __str__(self):
+        return self.name
 
 def start_date_validator(value):
     if value < timezone.now().date():

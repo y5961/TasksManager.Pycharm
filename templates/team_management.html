@@ -1,0 +1,22 @@
+<h1>team_management</h1>
+<h2>רשימת המשימות שלי</h2>
+
+{% if user.role == "Manager" %}
+    <div style="background-color: #f9f9f9; padding: 10px; border: 1px solid #ccc;">
+        <h3>פעולות ניהול:</h3>
+        <a href="{% url 'add_task' %}" class="btn">הוספת משימה חדשה</a>
+        <a href="{% url 'assign_tasks' %}" class="btn">שיוך משימות לעובדים</a>
+    </div>
+{% endif %}
+
+<table>
+    {% for task in tasks %}
+    <tr>
+        <td>{{ task.name }}</td>
+        <td>{{ task.status }}</td>
+        {% if user.role == "Manager" %}
+            <td><a href="{% url 'delete_task' task.id %}">מחק משימה</a></td>
+        {% endif %}
+    </tr>
+    {% endfor %}
+</table>
