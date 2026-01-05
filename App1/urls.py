@@ -5,8 +5,8 @@ from App1 import views
 
 urlpatterns = [
     path("", views.home),
-    path("signIn/", views.sign_in),
-    path("signUp/", views.sign_up),
+    path("sign-in/", views.sign_in,name="sign_in"),
+    path("sign-up/", views.sign_up,name="sign_up"),
     path('create-team/', views.create_team, name='create_team'),
     path('team-management/', views.team_management, name='team_management'),
     path('select-team/', views.select_team, name='select_team'),

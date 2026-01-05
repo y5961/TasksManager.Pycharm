@@ -15,7 +15,7 @@
         <td>{{ task.name }}</td>
         <td>{{ task.status }}</td>
         {% if user.role == "Manager" %}
-            <td><a href="{% url 'delete_task' task.id %}">מחק משימה</a></td>
+            <td>> <button>delete</button></a></td>
         {% endif %}
     </tr>
     {% endfor %}

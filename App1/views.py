@@ -1,11 +1,13 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from App1.forms import SignUpForm, SignInForm, AddTeamForm, JoinTeamForm
+from App1.forms import SignUpForm, SignInForm, AddTeamForm, JoinTeamForm, AddTaskForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth import get_user_model
-from App1.models import Team
+from App1.models import Team, Task
 from django.db import transaction
+from django.core.exceptions import PermissionDenied
 
 # Create your views here.
 def home(request):
@@ -24,7 +26,7 @@ def sign_up(request):
             return redirect('select_team')
     else:
         form = SignUpForm()
-    return render(request, 'SignUp.html', {'form': form})
+    return render(request, 'auth/sign_up.html', {'form': form})
 
 
 def sign_in(request):
@@ -42,9 +44,7 @@ def sign_in(request):
         form = AuthenticationForm()
         form.fields['username'].label = "Email"
 
-    return render(request, 'SignIn.html', {'form': form})
-
-
+    return render(request, 'auth/sign_in.html', {'form': form})
 def select_team(request):
     User = get_user_model()
     # 1. שליפת הנתונים מהסשן כבר בהתחלה
@@ -52,7 +52,7 @@ def select_team(request):
 
     # 2. הגנה: אם המשתמש הגיע לדף בלי לעבור ב-Sign Up
     if not user_data:
-        return redirect('SignUp')
+        return redirect('sign_up')
 
     if request.method == 'POST':
         form = JoinTeamForm(request.POST)
@@ -63,7 +63,7 @@ def select_team(request):
                 with transaction.atomic():
                     if User.objects.filter(email=user_data['email']).exists():
                         form.add_error(None, "משתמש עם אימייל זה כבר נרשם במערכת")
-                        return render(request, 'select_team.html', {'form': form})
+                        return render(request, 'teams/select_team.html', {'form': form})
 
                     user = User.objects.create_user(
                         username=user_data['email'],
@@ -86,7 +86,8 @@ def select_team(request):
         # טעינת טופס ריק במידה וזה GET
         form = JoinTeamForm()
 
-    return render(request, 'select_team.html', {'form': form})
+    return render(request, 'teams/select_team.html', {'form': form})
+
 
 def create_team(request):
     User = get_user_model()
@@ -122,28 +123,38 @@ def create_team(request):
                 form.add_error(None, "error, try again!!")
     else:
         form=AddTeamForm()
-    return render(request, 'create_team.html', {'form': form})
+    return render(request, 'teams/manage/create_team.html', {'form': form})
 
 def team_management(request):
-    return render(request, 'team_management.html')
+    tasks = Task.objects.filter(team=request.user.team)
+    return render(request, 'teams/team_management.html', {'tasks': tasks})
+
 
 def assign_tasks(request):
-    return render(request, 'assign_tasks.html')
+    return render(request, 'teams/manage/assign_tasks.html')
 
-
-from django.core.exceptions import PermissionDenied
-
-
+@login_required
 def add_task(request):
     # בדיקה האם המשתמש הוא מנהל
     if request.user.role != 'Manager':
-        raise PermissionDenied  # מחזיר שגיאה 403 - אין הרשאה
+        raise PermissionDenied
 
     if request.method == 'POST':
-        # קוד להוספת משימה...
-        pass
+        form = AddTaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
 
-    return render(request, 'add_task.html')
+            task.team = request.user.team
+            task.save()
+            return redirect('team_management')
+    else:
+        form = AddTaskForm()
+
+    return render(request, 'teams/manage/add_task.html', {'form': form})
+
+
+# return render(request, 'teams/manage/add_task.html')
+
 
 """
 def create_team(request):
