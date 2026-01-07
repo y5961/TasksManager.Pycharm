@@ -2,21 +2,89 @@
 <h2>רשימת המשימות שלי</h2>
 
 {% if user.role == "Manager" %}
-    <div style="background-color: #f9f9f9; padding: 10px; border: 1px solid #ccc;">
-        <h3>פעולות ניהול:</h3>
-        <a href="{% url 'add_task' %}" class="btn">הוספת משימה חדשה</a>
-        <a href="{% url 'assign_tasks' %}" class="btn">שיוך משימות לעובדים</a>
-    </div>
+<div style="background-color: #f9f9f9; padding: 10px; border: 1px solid #ccc; margin-bottom: 20px;">
+    <h3>פעולות ניהול:</h3>
+    <a href="{% url 'add_task' %}" class="btn">הוספת משימה חדשה</a>
+    <a href="{% url 'assign_tasks' %}" class="btn">שיוך משימות לעובדים</a>
+</div>
+
 {% endif %}
 
-<table>
+<h4>שם הצוות: {{ team.name }}</h4>
+
+<table border="1" style="width:100%; border-collapse: collapse; text-align: right;">
+    <thead>
+    <tr>
+        <th>שם המשימה</th>
+        <th> תיאור</th>
+        <th>תאריך יעד</th>
+        <th>סטטוס</th>
+        <th>מבצע</th>
+        {% if user.role == "Manager" %}
+        <th>פעולות</th>
+        {% endif %}
+    </tr>
+    </thead>
+    <tbody>
     {% for task in tasks %}
     <tr>
         <td>{{ task.name }}</td>
+        <td>{{ task.description }}</td>
+        <td>{{ task.end_date }}</td>
         <td>{{ task.status }}</td>
+
+        {% if user.role == "Manager" and not task.owner.first_name%}
+        <td>
+            <form action="{% url 'update_owner' task.id %}" method="POST" class="d-flex gap-1">
+                {% csrf_token %}
+                <select name="user_id" class="form-select form-select-sm" style="width: auto;">
+                    <option value="">-- בחר עובד --</option>
+                    {% for member in users %}
+                    <option value="{{ member.id }}" {% if task.owner == member %} selected {% endif %}>
+                        {{ member.first_name }} {{ member.last_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">שייך</button>
+            </form>
+        </td>
+        {% elif user.role == "TeamMember" and not task.owner.first_name%}
+        <td>
+            <form action="{% url 'update_owner' task.id %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ user.id }}">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    שייך אלי
+                </button>
+            </form>
+        </td>
+        {% else %}
+        <td>{{ task.owner.first_name}}</td>
+        {% endif %}
+
+
         {% if user.role == "Manager" %}
-            <td>> <button>delete</button></a></td>
+        <td>
+            <form action="{% url 'delete_task' task.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn-delete"
+                        onclick="return confirm('האם את בטוחה שברצונך למחוק משימה זו?')">
+                    מחיקה
+                </button>
+
+            </form>
+            {% if user.role == "Manager" and not task.owner.first_name%}
+            <a href="{% url 'edit_task' task.id %}" class="btn-edit">ערוך </a>
+            {% endif %}
+        </td>
         {% endif %}
     </tr>
+    {% empty %}
+    <tr>
+        <td colspan="{% if user.role == 'Manager' %}3{% else %}2{% endif %}" style="text-align:center;">
+            אין משימות להצגה לצוות זה
+        </td>
+    </tr>
     {% endfor %}
+    </tbody>
 </table>

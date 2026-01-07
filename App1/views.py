@@ -1,17 +1,18 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from App1.forms import SignUpForm, SignInForm, AddTeamForm, JoinTeamForm, AddTaskForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth import get_user_model
-from App1.models import Team, Task
+from App1.models import Team, Task, User
 from django.db import transaction
 from django.core.exceptions import PermissionDenied
 
+
 # Create your views here.
 def home(request):
-    return render(request,'home.html')
+    return render(request, 'home.html')
 
 
 def sign_up(request):
@@ -45,6 +46,8 @@ def sign_in(request):
         form.fields['username'].label = "Email"
 
     return render(request, 'auth/sign_in.html', {'form': form})
+
+
 def select_team(request):
     User = get_user_model()
     # 1. שליפת הנתונים מהסשן כבר בהתחלה
@@ -96,11 +99,11 @@ def create_team(request):
     if not user_data:
         return redirect('sign_up')
     if request.method == 'POST':
-        form=AddTeamForm(request.POST)
+        form = AddTeamForm(request.POST)
         if form.is_valid():
             try:
                 with transaction.atomic():
-                  team_name = form.cleaned_data['name']
+                    team_name = form.cleaned_data['name']
 
                 if Team.objects.filter(name=team_name).exists():
                     form.add_error('name', 'This team name already exists')
@@ -122,20 +125,27 @@ def create_team(request):
                 # אם קרתה תקלה כלשהי, שום דבר לא יישמר ב-DB
                 form.add_error(None, "error, try again!!")
     else:
-        form=AddTeamForm()
+        form = AddTeamForm()
     return render(request, 'teams/manage/create_team.html', {'form': form})
+
 
 def team_management(request):
     tasks = Task.objects.filter(team=request.user.team)
-    return render(request, 'teams/team_management.html', {'tasks': tasks})
+    team = request.user.team
+    context = {
+        'tasks': tasks,
+        'team': team,
+        'users': User.objects.filter(team=team),
+    }
+    return render(request, 'teams/team_management.html', context)
 
 
 def assign_tasks(request):
     return render(request, 'teams/manage/assign_tasks.html')
 
+
 @login_required
 def add_task(request):
-    # בדיקה האם המשתמש הוא מנהל
     if request.user.role != 'Manager':
         raise PermissionDenied
 
@@ -153,80 +163,49 @@ def add_task(request):
     return render(request, 'teams/manage/add_task.html', {'form': form})
 
 
-# return render(request, 'teams/manage/add_task.html')
-
-
-"""
-def create_team(request):
-    User = get_user_model()
-    user_data = request.session.get('temp_user_data')
-
-    if not user_data:
-        return redirect('sign_up')
+@login_required
+def delete_task(request, task_id):
+    if request.user.role != 'Manager':
+        raise PermissionDenied
 
     if request.method == 'POST':
-        form = AddTeamForm(request.POST)
+        task = Task.objects.get(id=task_id)
+        task.delete()
+        return redirect('team_management')
+
+# return render(request, 'teams/manage/add_task.html')
+def edit_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    if request.user.role != 'Manager':
+        raise PermissionDenied
+    if request.method == 'POST':
+        form = AddTaskForm(request.POST, instance=task)
         if form.is_valid():
-            try:
-                # ההזחה מתחילה כאן - כל מה שקורה בתוך הבלוק הזה הוא יחידה אחת
-                with transaction.atomic():
-                    team_name = form.cleaned_data['name']
-
-                    if Team.objects.filter(name=team_name).exists():
-                        form.add_error('name', 'This team name already exists')
-                        # כאן לא צריך raise כי אנחנו רוצים לחזור לטופס עם השגיאה
-                    else:
-                        # 1. יצירת הקבוצה
-                        new_team = Team.objects.create(name=team_name)
-
-                        # 2. יצירת המשתמש ושיוכו לקבוצה החדשה
-                        user = User.objects.create_user(
-                            username=user_data['email'],
-                            email=user_data['email'],
-                            password=user_data['password'],
-                            first_name=user_data['first_name'],
-                            last_name=user_data['last_name'],
-                            role=user_data['role'],
-                            team=new_team
-                        )
-
-                        # 3. ניקוי הסשן וביצוע התחברות
-                        del request.session['temp_user_data']
-                        login(request, user)
-
-                        return redirect('team_management')
-
-            except Exception as e:
-                # אם משהו השתבש בתוך ה-atomic, נגיע לכאן
-                print(f"Error during team/user creation: {e}")
-                form.add_error(None, "An error occurred, please try again.")
+            form.save()
+            return redirect('team_management')
     else:
-        form = AddTeamForm()
+        form = AddTaskForm(instance=task)
 
-    return render(request, 'create_team.html', {'form': form})
-    """
-# def select_team(request):
-#     if request.method == 'POST':
-#         form = JoinTeamForm(request.POST)
-#         if form.is_valid():
-#             selected_team = form.cleaned_data['team']
-#             # כאן את שומרת את הקבוצה שנבחרה בסשן או יוצרת את המשתמש
-#             user_data = request.session.get('temp_user_data')
-#             if user_data:
-#                 User = get_user_model()
-#                 user = User.objects.create_user(
-#                     username=user_data['email'],
-#                     email=user_data['email'],
-#                     password=user_data['password'],
-#                     first_name=user_data['first_name'],
-#                     last_name=user_data['last_name'],
-#                     role=user_data['role'],
-#                     team=selected_team
-#                 )
-#                 login(request, user)
-#                 del request.session['temp_user_data']
-#                 return redirect('home')
-#     else:
-#         form = JoinTeamForm()
-#
-#     return render(request, 'select_team.html', {'form': form})
+    return render(request, 'teams/manage/add_task.html', {
+        'form': form,
+        'is_edit': True  # עוזר לנו לשנות את הכותרת ב-HTML במידת הצורך
+    })
+
+
+@login_required
+def update_owner(request, task_id):
+
+    if request.method == 'POST':
+        task = get_object_or_404(Task, id=task_id, team=request.user.team)
+        new_owner_id = request.POST.get('user_id')
+        if new_owner_id:
+            new_owner = get_object_or_404(User, id=new_owner_id)
+            task.owner = new_owner
+            task.status = "ON_PROCESS"
+            task.save()
+
+
+        return redirect('team_management')
+
+    return redirect('team_management')
+
