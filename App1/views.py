@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -132,11 +133,21 @@ def create_team(request):
 def team_management(request):
     tasks = Task.objects.filter(team=request.user.team)
     team = request.user.team
+    status_filter = request.GET.get('status')
+    if status_filter: tasks = tasks.filter(status=status_filter)
+
+    now = timezone.now().date()
+
+    for task in tasks:
+        if task.end_date < now and task.status != 'EXPIRED':
+            task.status = 'EXPIRED'
+            task.save()
     context = {
         'tasks': tasks,
         'team': team,
         'users': User.objects.filter(team=team),
     }
+
     return render(request, 'teams/team_management.html', context)
 
 
@@ -207,5 +218,16 @@ def update_owner(request, task_id):
 
         return redirect('team_management')
 
+    return redirect('team_management')
+
+@login_required
+def update_status(request, task_id):
+    if request.method == 'POST':
+        task = get_object_or_404(Task, id=task_id, team=request.user.team)
+        new_owner_id = request.POST.get('user_id')
+        if new_owner_id:
+            task.status = "DONE"
+            task.save()
+        return redirect('team_management')
     return redirect('team_management')
 

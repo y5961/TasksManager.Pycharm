@@ -1,14 +1,21 @@
 <h1>team_management</h1>
 <h2>רשימת המשימות שלי</h2>
 
-{% if user.role == "Manager" %}
+
 <div style="background-color: #f9f9f9; padding: 10px; border: 1px solid #ccc; margin-bottom: 20px;">
+    {% if user.role == "Manager" %}
     <h3>פעולות ניהול:</h3>
     <a href="{% url 'add_task' %}" class="btn">הוספת משימה חדשה</a>
-    <a href="{% url 'assign_tasks' %}" class="btn">שיוך משימות לעובדים</a>
+    {% endif %}
+    <h2>חיפוש במשימות של הקבוצה</h2>
+    <a href="?status=NEW_TASK" class="btn btn-primary btn-sm">New task</a>
+    <a href="?status=DONE" class="btn btn-primary btn-sm">Done</a>
+    <a href="?status=ON_PROCESS" class="btn btn-primary btn-sm">On process</a>
+    <a href="?status=EXPIRED" class="btn btn-primary btn-sm">Expierd</a>
+    <a href="?" class="btn btn-secondary btn-sm">נקה סינון</a>
+
 </div>
 
-{% endif %}
 
 <h4>שם הצוות: {{ team.name }}</h4>
 
@@ -31,7 +38,19 @@
         <td>{{ task.name }}</td>
         <td>{{ task.description }}</td>
         <td>{{ task.end_date }}</td>
-        <td>{{ task.status }}</td>
+
+        <td>
+            {{ task.status }}
+            {% if user.id == task.owner.id and task.status != "DONE"%}
+            <form action="{% url 'update_status' task.id %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ user.id }}">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    עדכן סטטוס
+                </button>
+            </form>
+            {% endif %}
+        </td>
 
         {% if user.role == "Manager" and not task.owner.first_name%}
         <td>
