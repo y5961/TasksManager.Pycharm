@@ -16,6 +16,15 @@
 
 </div>
 
+<form method="GET" action="{% url 'team_management' %}">
+    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="חפש משתמש...">
+    <button type="submit" class="btn btn-secondary btn-sm">חפש</button>
+
+    {% if current_filter %}
+        <input type="hidden" name="status" value="{{ current_filter }}">
+    {% endif %}
+</form>
+
 
 <h4>שם הצוות: {{ team.name }}</h4>
 
@@ -67,6 +76,10 @@
                 <button type="submit" class="btn btn-sm btn-primary">שייך</button>
             </form>
         </td>
+        {% elif not task.owner.first_name and task.status == 'EXPIRED'%}
+        <td> <div>'Not available</div></td>
+
+
         {% elif user.role == "TeamMember" and not task.owner.first_name%}
         <td>
             <form action="{% url 'update_owner' task.id %}" method="POST">
@@ -77,6 +90,7 @@
                 </button>
             </form>
         </td>
+
         {% else %}
         <td>{{ task.owner.first_name}}</td>
         {% endif %}

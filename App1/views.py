@@ -139,9 +139,17 @@ def team_management(request):
     now = timezone.now().date()
 
     for task in tasks:
-        if task.end_date < now and task.status != 'EXPIRED':
-            task.status = 'EXPIRED'
-            task.save()
+        if task.end_date < now and task.status != 'EXPIRED' and task.status != 'DONE':
+                task.status = 'EXPIRED'
+                task.save()
+
+    query = request.GET.get('q')  # כאן אנחנו תופסים את מה שהמשתמש כתב
+
+
+    if query:
+            # מסנן לפי שם פרטי או שם משפחה של המבצע
+        tasks = tasks.filter(owner__first_name__icontains=query)
+
     context = {
         'tasks': tasks,
         'team': team,
