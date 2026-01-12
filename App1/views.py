@@ -17,6 +17,8 @@ def home(request):
 
 
 def sign_up(request):
+    if request.user.is_authenticated:
+        return redirect('team_management')
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
@@ -32,6 +34,8 @@ def sign_up(request):
 
 
 def sign_in(request):
+    if request.user.is_authenticated:
+        return redirect('team_management')
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -50,10 +54,12 @@ def sign_in(request):
 
 
 def select_team(request):
+    if request.user.is_authenticated:
+        return redirect('team_management')
     User = get_user_model()
     # 1. שליפת הנתונים מהסשן כבר בהתחלה
     user_data = request.session.get('temp_user_data')
-
+    teams = Team.objects.all()
     # 2. הגנה: אם המשתמש הגיע לדף בלי לעבור ב-Sign Up
     if not user_data:
         return redirect('sign_up')
@@ -89,11 +95,13 @@ def select_team(request):
     else:
         # טעינת טופס ריק במידה וזה GET
         form = JoinTeamForm()
-
-    return render(request, 'teams/select_team.html', {'form': form})
+    context = {'form': form, 'teams': teams}
+    return render(request, 'teams/select_team.html', context)
 
 
 def create_team(request):
+    if request.user.is_authenticated:
+        return redirect('team_management')
     User = get_user_model()
     user_data = request.session['temp_user_data']
 
@@ -130,6 +138,7 @@ def create_team(request):
     return render(request, 'teams/manage/create_team.html', {'form': form})
 
 
+@login_required
 def team_management(request):
     tasks = Task.objects.filter(team=request.user.team)
     team = request.user.team
@@ -140,14 +149,13 @@ def team_management(request):
 
     for task in tasks:
         if task.end_date < now and task.status != 'EXPIRED' and task.status != 'DONE':
-                task.status = 'EXPIRED'
-                task.save()
+            task.status = 'EXPIRED'
+            task.save()
 
     query = request.GET.get('q')  # כאן אנחנו תופסים את מה שהמשתמש כתב
 
-
     if query:
-            # מסנן לפי שם פרטי או שם משפחה של המבצע
+        # מסנן לפי שם פרטי או שם משפחה של המבצע
         tasks = tasks.filter(owner__first_name__icontains=query)
 
     context = {
@@ -192,11 +200,13 @@ def delete_task(request, task_id):
         task.delete()
         return redirect('team_management')
 
-# return render(request, 'teams/manage/add_task.html')
+
 def edit_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     if request.user.role != 'Manager':
-        raise PermissionDenied
+        raise PermissionDenied("רק מנהלים יכולים לערוך משימות")
+    if not task.status == 'NEW_TASK':
+        raise PermissionDenied("לא ניתן לערוך משימה שהושלמה")
     if request.method == 'POST':
         form = AddTaskForm(request.POST, instance=task)
         if form.is_valid():
@@ -213,29 +223,37 @@ def edit_task(request, task_id):
 
 @login_required
 def update_owner(request, task_id):
-
     if request.method == 'POST':
         task = get_object_or_404(Task, id=task_id, team=request.user.team)
         new_owner_id = request.POST.get('user_id')
-        if new_owner_id:
-            new_owner = get_object_or_404(User, id=new_owner_id)
-            task.owner = new_owner
-            task.status = "ON_PROCESS"
+        if request.user.role == 'Manager':
+            if not task.owner and new_owner_id:
+                new_owner = get_object_or_404(User, id=new_owner_id)
+                task.owner = new_owner
+                task.status = "ON_PROCESS"
+                task.save()
+        else:
+            if not task.owner and task.status != 'EXPIRED' and int(new_owner_id) == request.user.id:
+                task.owner = request.user
+                task.status = "ON_PROCESS"
             task.save()
-
 
         return redirect('team_management')
 
     return redirect('team_management')
+
 
 @login_required
 def update_status(request, task_id):
     if request.method == 'POST':
         task = get_object_or_404(Task, id=task_id, team=request.user.team)
-        new_owner_id = request.POST.get('user_id')
-        if new_owner_id:
+        if task.owner and task.owner.id == request.user.id and task.status != 'DONE':
             task.status = "DONE"
             task.save()
         return redirect('team_management')
     return redirect('team_management')
 
+
+def log_out(request):
+    logout(request)
+    return redirect('home')

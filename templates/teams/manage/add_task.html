@@ -1,53 +1,289 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>הוספת משימה חדשה</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if task %}עריכת משימה{% else %}הוספת משימה חדשה{% endif %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Rubik', sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a2456 25%, #2d1b69 50%, #1a2456 75%, #0a0e27 100%);
+        }
+
+        main {
+            flex: 1;
+            padding-top: 80px;
+            padding-bottom: 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        .page-header h1 {
+            background: linear-gradient(135deg, #2563eb 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            background: linear-gradient(135deg, #06b6d4, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .task-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 248, 255, 0.98) 100%);
+            border-radius: 1.5rem;
+            border: 2px solid rgba(37, 99, 235, 0.3);
+            box-shadow: 0 20px 60px rgba(37, 99, 235, 0.3);
+            padding: 2.5rem;
+            max-width: 700px;
+            margin: 0 auto;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            background: linear-gradient(135deg, #2563eb, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.7rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e7ff;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: white;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(245, 248, 255, 0.5));
+        }
+
+        .form-errors {
+            background: #fee2e2;
+            border-left: 4px solid #dc2626;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-errors ul, .form-errors p {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .helptext {
+            display: block;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 0.3rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: white;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(37, 99, 235, 0.5);
+        }
+
+        .btn-cancel {
+            background: #e2e8f0;
+            color: #64748b;
+            border: 2px solid #cbd5e1;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-cancel:hover {
+            background: #cbd5e1;
+            transform: translateY(-2px);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .page-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .task-card {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body>
+    {% include "components/NavBar.html" %}
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="card-title mb-0">יצירת משימה חדשה</h3>
-                </div>
-                <div class="card-body">
+    <main class="container">
+        <div class="page-header">
+            <h1>
+                <i class="fas fa-tasks me-2"></i>
+                {% if task %}עריכת משימה{% else %}יצירת משימה חדשה{% endif %}
+            </h1>
+            <p>
+                {% if task %}ערוך את פרטי המשימה{% else %}הוסף משימה חדשה לצוות{% endif %}
+            </p>
+        </div>
 
-                    <form method="post">
-                        {% csrf_token %}
+        <div class="task-card">
+            <form method="post">
+                {% csrf_token %}
 
-                        {% for field in form %}
-                            <div class="mb-3">
-                                <label for="{{ field.id_for_label }}" class="form-label font-weight-bold">
-                                    {{ field.label }}
-                                </label>
+                {% if form.non_field_errors %}
+                    <div class="form-errors">
+                        <p><strong>שגיאה:</strong></p>
+                        <ul>
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
 
-                                {{ field }}
+                {% for field in form %}
+                    {% if field.widget.input_type != 'hidden' %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
 
-                                {% if field.help_text %}
-                                    <div class="form-text text-muted">
-                                        {{ field.help_text }}
-                                    </div>
-                                {% endif %}
+                            {% if field.help_text %}
+                                <div class="helptext">
+                                    {{ field.help_text|safe }}
+                                </div>
+                            {% endif %}
 
-                                {% if field.errors %}
-                                    <div class="text-danger small">
-                                        {{ field.errors }}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success">שמור משימה</button>
-                            <a href="{% url 'team_management' %}" class="btn btn-secondary">ביטול</a>
+                            {% if field.errors %}
+                                <div class="form-errors" style="margin-top: 0.5rem; margin-bottom: 0;">
+                                    <ul>
+                                        {% for error in field.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
                         </div>
-                    </form>
+                    {% endif %}
+                {% endfor %}
 
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-save">
+                        <i class="fas fa-save"></i> {% if task %}עדכן משימה{% else %}צור משימה{% endif %}
+                    </button>
+                    <a href="{% url 'team_management' %}" class="btn btn-cancel">
+                        <i class="fas fa-times-circle"></i> ביטול
+                    </a>
                 </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
             </div>
         </div>
     </div>

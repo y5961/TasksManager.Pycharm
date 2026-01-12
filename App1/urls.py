@@ -16,6 +16,7 @@ urlpatterns = [
     path('edit-task/<int:task_id>/', views.edit_task, name='edit_task'),
     path('update-owner/<int:task_id>/', views.update_owner, name='update_owner'),
     path('update-status/<int:task_id>/', views.update_status, name='update_status'),
+    path("logout/", views.log_out, name="log_out"),
     # path('filter-tasks/<int:task_id>/', views.filter_tasks, name='filter_tasks'),
 
 ]

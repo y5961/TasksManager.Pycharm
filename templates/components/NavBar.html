@@ -1,49 +1,221 @@
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <link rel="stylesheet" href="{% static 'My-app/css/NavBar.css' %}">
-    <link rel="stylesheet" href="{% static 'bootstrap-5.3.8-dist/css/bootstrap.min.css' %}">
-    {% block extra_head %}{% endblock %}
-</head>
-<body>
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg fixed-top bg-light navbar-light">
-  <button class="navbar-toggler" type="button" data-mdb-collapse-init data-mdb-target="#navbarSupportedContent"
-    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <i class="fas fa-bars"></i>
-  </button>
-  <div class="container d-flex justify-content-center">
-    <div class="row">
-      <div class="col-12 d-flex justify-content-center mb-3">
-        <a class="navbar-brand" href="#"><img id="MDB-logo"
-            src="../../static/My-app/images/DoIt.gif" alt="MDB Logo"
-            draggable="false" height="30" /></a>
-      </div>
-      <div class="col-12 d-flex justify-content-center">
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav align-items-center mx-auto">
-            <li class="nav-item">
-              <a class="nav-link mx-2" href="#!"><i class="fas fa-plus-circle pe-2"></i>Post</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link mx-2" href="#!"><i class="fas fa-bell pe-2"></i>Alerts</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link mx-2" href="#!"><i class="fas fa-heart pe-2"></i>Trips</a>
-            </li>
-          </ul>
-        </div>
-      </div>
+<nav class="navbar navbar-expand-lg fixed-top navbar-light shadow-sm" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-bottom: 2px solid rgba(37, 99, 235, 0.15);">
+  <div class="container-fluid">
+    <!-- Navbar Brand with Logo -->
+    <a class="navbar-brand d-flex align-items-center fw-bold" href="{% url 'home' %}" style="text-decoration: none;">
+      <img src="{% static 'My-App/images/DoIt.gif' %}?t={% now 'U' %}" alt="לוגו DoIt" height="55" class="me-2 logo-gif glow" style="max-width: 70px; animation: glow 2s ease-in-out infinite;">
+    </a>
+
+    <!-- Mobile Toggle Button -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+      aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation"
+      style="border-color: rgba(37, 99, 235, 0.5);">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Navbar Items -->
+    <div class="collapse navbar-collapse" id="mainNavbar">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+
+        {% if user.is_authenticated %}
+          <!-- For Authenticated Users -->
+
+          <!-- Filter Button (Only on Tasks page) -->
+          {% if request.resolver_match.url_name == 'team_management' %}
+          <li class="nav-item me-2">
+            <button class="nav-link d-flex align-items-center" style="background: linear-gradient(135deg, #06b6d4 0%, #2563eb 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; transition: all 0.3s ease; animation: slideDown 0.5s ease-out;" data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas">
+              <i class="fas fa-filter me-1"></i>
+              <span>סינון</span>
+            </button>
+          </li>
+          {% endif %}
+
+          <!-- Team Badge -->
+          <li class="nav-item me-2">
+            <span class="nav-link d-flex align-items-center" style="background: linear-gradient(135deg, #2563eb 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 700; animation: fadeIn 0.6s ease-out;">
+              <i class="fas fa-users me-2" style="background: linear-gradient(135deg, #2563eb, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+              {{ user.team.name }}
+            </span>
+          </li>
+
+          <!-- User Name -->
+          <li class="nav-item me-2">
+            <span class="nav-link d-flex align-items-center" style="color: #64748b; animation: fadeIn 0.7s ease-out;">
+              <i class="fas fa-user-circle me-2" style="color: #2563eb; font-size: 1.2rem;"></i>
+              {{ user.first_name }} {{ user.last_name }}
+            </span>
+          </li>
+
+          <!-- Add Task Button (Only for Managers) -->
+          {% if user.role == 'Manager' %}
+          <li class="nav-item me-2">
+            <a class="nav-link d-flex align-items-center" href="{% url 'add_task' %}" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; transition: all 0.3s ease; animation: slideDown 0.6s ease-out;">
+              <i class="fas fa-plus me-1"></i>
+              <span>הוסף משימה</span>
+            </a>
+          </li>
+          {% endif %}
+
+          <!-- Logout Button -->
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center" href="{% url 'log_out' %}" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; transition: all 0.3s ease; animation: slideDown 0.7s ease-out;">
+              <i class="fas fa-sign-out-alt me-1"></i>
+              <span>התנתק</span>
+            </a>
+          </li>
+
+        {% else %}
+          <!-- For Anonymous Users -->
+
+          <!-- Sign In Link -->
+          <li class="nav-item me-2">
+            <a class="nav-link d-flex align-items-center" href="{% url 'sign_in' %}" style="color: #2563eb; font-weight: 600; transition: all 0.3s ease; animation: slideDown 0.6s ease-out;">
+              <i class="fas fa-sign-in-alt me-1"></i>
+              <span>התחבר</span>
+            </a>
+          </li>
+
+          <!-- Sign Up Button -->
+          <li class="nav-item">
+            <a class="nav-link btn text-white ms-2 d-flex align-items-center" href="{% url 'sign_up' %}" style="background: linear-gradient(135deg, #2563eb 0%, #a855f7 100%); border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; transition: all 0.3s ease; animation: slideDown 0.7s ease-out;">
+              <i class="fas fa-user-plus me-1"></i>
+              <span>צור משתמש</span>
+            </a>
+          </li>
+        {% endif %}
+
+      </ul>
     </div>
   </div>
 </nav>
-<!-- Navbar -->
-<div class="container">
-    {% block content %}
-    {% endblock %}
+
+<!-- Filters Sidebar (Offcanvas) -->
+{% if user.is_authenticated and request.resolver_match.url_name == 'team_management' %}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" style="width: 320px;">
+  <div class="offcanvas-header" style="background: linear-gradient(135deg, #2563eb 0%, #a855f7 100%); color: white;">
+    <h5 class="offcanvas-title" id="filtersOffcanvasLabel">
+      <i class="fas fa-filter me-2"></i>סינון משימות
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body" style="background: #f8fafc; padding: 1.5rem;">
+    <form method="get" id="filterForm">
+      <div class="filter-group mb-3">
+        <label for="search" style="font-weight: 600; background: linear-gradient(135deg, #2563eb, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.7rem; display: block;">
+          <i class="fas fa-search me-1"></i>חיפוש לפי שם עובד
+        </label>
+        <input type="text" id="search" name="q" placeholder="שם עובד..." value="{{ request.GET.q }}"
+          style="width: 100%; padding: 0.75rem; border: 2px solid #e0e7ff; border-radius: 0.75rem; font-size: 0.95rem; transition: all 0.3s ease;"
+          onchange="this.form.submit();">
+      </div>
+
+      <div class="filter-group mb-4">
+        <label for="status" style="font-weight: 600; background: linear-gradient(135deg, #2563eb, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.7rem; display: block;">
+          <i class="fas fa-tasks me-1"></i>סטטוס
+        </label>
+        <select id="status" name="status"
+          style="width: 100%; padding: 0.75rem; border: 2px solid #e0e7ff; border-radius: 0.75rem; font-size: 0.95rem; transition: all 0.3s ease; cursor: pointer;"
+          onchange="this.form.submit();">
+          <option value="">הכל</option>
+          <option value="NEW_TASK" {% if request.GET.status == 'NEW_TASK' %}selected{% endif %}>
+            <i class="fas fa-star"></i> משימה חדשה
+          </option>
+          <option value="ON_PROCESS" {% if request.GET.status == 'ON_PROCESS' %}selected{% endif %}>
+            <i class="fas fa-hourglass-start"></i> בתהליך
+          </option>
+          <option value="DONE" {% if request.GET.status == 'DONE' %}selected{% endif %}>
+            <i class="fas fa-check-circle"></i> הושלמה
+          </option>
+          <option value="EXPIRED" {% if request.GET.status == 'EXPIRED' %}selected{% endif %}>
+            <i class="fas fa-exclamation-circle"></i> פג תוקף
+          </option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn" style="width: 100%; background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; border: none; padding: 0.75rem; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+        <i class="fas fa-search me-1"></i> חפש
+      </button>
+
+      {% if request.GET.q or request.GET.status %}
+      <a href="{% url 'team_management' %}" class="btn" style="width: 100%; background: #e2e8f0; color: #64748b; border: none; padding: 0.75rem; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 0.75rem; text-decoration: none; display: block; text-align: center;">
+        <i class="fas fa-redo me-1"></i> אפס סינון
+      </a>
+      {% endif %}
+    </form>
+  </div>
 </div>
-</body>
-</html>
+{% endif %}
+
+<!-- Loading Overlay -->
+<div id="site-loader" class="site-loader" style="display: none;">
+  <div class="spinner">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">טוען...</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes glow {
+    0%, 100% {
+      filter: drop-shadow(0 0 5px rgba(37, 99, 235, 0.5));
+    }
+    50% {
+      filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.7));
+    }
+  }
+
+  .nav-link {
+    transition: all 0.3s ease;
+  }
+
+  .nav-link:hover {
+    transform: translateY(-2px);
+  }
+
+  .navbar-brand:hover {
+    transform: scale(1.05);
+  }
+
+  .filter-group input:focus,
+  .filter-group select:focus {
+    outline: none;
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  }
+
+  .offcanvas-body {
+    animation: slideLeft 0.3s ease-out;
+  }
+
+  @keyframes slideLeft {
+    from {
+      opacity: 0;
+      transform: translateX(50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+</style>

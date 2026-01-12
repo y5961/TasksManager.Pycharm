@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DoIt - מערכת משימות{% endblock %}</title>
+
+    <!-- Bootstrap 5.3 RTL CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts - Hebrew -->
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    {% load static %}
+    <!-- Custom CSS Files -->
+    <link rel="stylesheet" href="{% static 'My-App/css/NavBar.css' %}">
+    <link rel="stylesheet" href="{% static 'My-App/css/Welcome.css' %}">
+    <link rel="stylesheet" href="{% static 'My-App/css/Global.css' %}">
+
+    <style>
+        * {
+            font-family: 'Rubik', sans-serif;
+        }
+
+        /* Remove extra space before footer on auth pages */
+        main {
+            flex: 1;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        footer {
+            margin-top: 0 !important;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Navigation -->
+    {% include 'components/NavBar.html' %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-4 mt-0">
+        <div class="container">
+            <p class="mb-2">&copy; 2026 DoIt - מערכת ניהול משימות חכמה</p>
+            <p class="mb-0" style="font-size: 0.9rem; color: #cbd5e1;">
+                פותח על ידי:
+                <a href="mailto:ayala32952@gmail.com" style="color: #60a5fa; text-decoration: none;">אילה אלבוגן</a> &amp;
+                <a href="mailto:yehudit5961@gmail.com" style="color: #60a5fa; text-decoration: none;">יהודית שחר</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="{% static 'My-App/js/animations.js' %}"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,424 @@
+
+/* ==========================================
+   WELCOME PAGE STYLES - עיצוב דף הכניסה
+   ========================================== */
+
+/* ==========================================
+   Hero Section
+   ========================================== */
+
+.welcome-section {
+    background: linear-gradient(135deg, #0a0e27 0%, #1a2456 25%, #2d1b69 50%, #1a2456 75%, #0a0e27 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero {
+    position: relative;
+    z-index: 1;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #a855f7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: slideDown 0.8s ease-out;
+    margin-bottom: 1.5rem;
+    color: white;
+}
+
+.hero p {
+    font-size: 1.375rem;
+    color: #e0e7ff;
+    max-width: 500px;
+    margin: 0 auto 2rem;
+    line-height: 1.8;
+    animation: slideUp 0.8s ease-out 0.2s both;
+}
+
+.hero .btn {
+    animation: slideUp 0.8s ease-out 0.4s both;
+}
+
+.hero .btn + .btn {
+    animation: slideUp 0.8s ease-out 0.5s both;
+}
+
+/* ==========================================
+   Hero Card
+   ========================================== */
+
+.hero-card {
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.9) 0%, rgba(37, 99, 235, 0.8) 100%);
+    border-radius: 1.5rem;
+    border: 2px solid rgba(168, 85, 247, 0.4);
+    backdrop-filter: blur(10px);
+    animation: slideLeft 0.8s ease-out 0.3s both;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px rgba(168, 85, 247, 0.3);
+    text-align: center;
+}
+
+.hero-card:hover {
+    transform: translateY(-10px);
+    border-color: rgba(168, 85, 247, 0.8);
+    box-shadow: 0 15px 50px rgba(168, 85, 247, 0.5);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.95) 0%, rgba(168, 85, 247, 0.9) 100%);
+}
+
+.hero-card h3 {
+    color: white;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.hero-card p {
+    color: #e0e7ff;
+}
+
+.hero-logo {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.4));
+    animation: float 4s ease-in-out infinite;
+}
+
+.hero-logo.glow {
+    animation: float 4s ease-in-out infinite, glow 3s ease-in-out infinite;
+}
+
+/* ==========================================
+   Accent Bubbles - בועות עיצוביות
+   ========================================== */
+
+.accent-bubble {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.1;
+    animation: float 6s ease-in-out infinite;
+}
+
+.bubble-1 {
+    width: 300px;
+    height: 300px;
+    background: linear-gradient(135deg, #2563eb, #a855f7);
+    top: -100px;
+    right: -100px;
+    animation: float 8s ease-in-out infinite;
+}
+
+.bubble-2 {
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(135deg, #06b6d4, #10b981);
+    bottom: -50px;
+    left: -50px;
+    animation: float 10s ease-in-out infinite;
+    animation-delay: 1s;
+}
+
+/* ==========================================
+   Features Section
+   ========================================== */
+
+.features {
+    padding: 4rem 2rem;
+    animation: slideUp 1s ease-out 0.6s both;
+}
+
+.feature-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
+    border-radius: 1rem;
+    border: 2px solid rgba(37, 99, 235, 0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: all 0.5s ease;
+}
+
+.feature-card:hover::before {
+    left: 100%;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    border-color: rgba(37, 99, 235, 0.3);
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.15);
+}
+
+.feature-card h5 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #2563eb, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+    animation: slideUp 0.8s ease-out;
+}
+
+.feature-card p {
+    color: #64748b;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.feature-card:nth-child(1) {
+    animation: slideUp 0.8s ease-out 0.7s both;
+}
+
+.feature-card:nth-child(2) {
+    animation: slideUp 0.8s ease-out 0.8s both;
+}
+
+.feature-card:nth-child(3) {
+    animation: slideUp 0.8s ease-out 0.9s both;
+}
+
+/* Feature Card Icons (Optional) */
+.feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+.feature-card:nth-child(1) .feature-icon {
+    color: #f97316;
+    animation-delay: 0s;
+}
+
+.feature-card:nth-child(2) .feature-icon {
+    color: #06b6d4;
+    animation-delay: 0.2s;
+}
+
+.feature-card:nth-child(3) .feature-icon {
+    color: #10b981;
+    animation-delay: 0.4s;
+}
+
+/* ==========================================
+   Loading & Transitions
+   ========================================== */
+
+.site-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.site-loader.loading {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.spinner {
+    position: relative;
+}
+
+.spinner-border {
+    width: 4rem;
+    height: 4rem;
+    border-width: 0.4rem;
+    background: conic-gradient(
+        from 0deg,
+        #2563eb 0deg,
+        #a855f7 90deg,
+        #06b6d4 180deg,
+        #10b981 270deg,
+        #2563eb 360deg
+    );
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ==========================================
+   Stats Section
+   ========================================== */
+
+.stats-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-item {
+    flex: 1;
+    padding: 1rem 0.5rem;
+    animation: slideUp 0.8s ease-out;
+}
+
+.stat-item h4 {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.stat-item p {
+    font-size: 0.85rem;
+    color: #cbd5e1;
+}
+
+/* ==========================================
+   Feature Items in Hero
+   ========================================== */
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.75rem;
+    border-left: 3px solid #a855f7;
+    transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(10px);
+}
+
+.feature-item strong {
+    color: #60a5fa;
+}
+
+/* ==========================================
+   CTA Section Updates
+   ========================================== */
+
+.cta-section {
+    background: linear-gradient(135deg, #2563eb 0%, #a855f7 50%, #4f46e5 100%);
+    color: white;
+    padding: 4rem 2rem;
+    border-radius: 1.5rem;
+    text-align: center;
+    margin: 4rem 0;
+    animation: slideUp 1s ease-out 1s both;
+}
+
+.cta-section h2 {
+    color: white;
+    margin-bottom: 1.5rem;
+    font-size: 2.5rem;
+}
+
+.cta-section p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+/* ==========================================
+   Responsive Design
+   ========================================== */
+
+@media (max-width: 768px) {
+    .welcome-section {
+        min-height: auto;
+        padding: 3rem 0;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .hero p {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-logo {
+        width: 150px;
+        height: 150px;
+    }
+
+    .feature-card {
+        padding: 1.5rem !important;
+    }
+
+    .accent-bubble {
+        display: none;
+    }
+
+    .features {
+        padding: 2rem 1rem;
+    }
+
+    .cta-section {
+        margin: 2rem 0;
+        padding: 2rem 1rem;
+    }
+
+    .cta-section h2 {
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero h1 {
+        font-size: 1.5rem;
+    }
+
+    .hero p {
+        font-size: 0.95rem;
+    }
+
+    .hero .btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero .btn + .btn {
+        margin-right: 0;
+    }
+
+    .cta-section h2 {
+        font-size: 1.5rem;
+    }
+}

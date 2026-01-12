@@ -1,123 +1,565 @@
-<h1>team_management</h1>
-<h2>רשימת המשימות שלי</h2>
+{% load static %}
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>רשימת המשימות</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Rubik', sans-serif;
+        }
 
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a2456 25%, #2d1b69 50%, #1a2456 75%, #0a0e27 100%);
+        }
 
-<div style="background-color: #f9f9f9; padding: 10px; border: 1px solid #ccc; margin-bottom: 20px;">
-    {% if user.role == "Manager" %}
-    <h3>פעולות ניהול:</h3>
-    <a href="{% url 'add_task' %}" class="btn">הוספת משימה חדשה</a>
-    {% endif %}
-    <h2>חיפוש במשימות של הקבוצה</h2>
-    <a href="?status=NEW_TASK" class="btn btn-primary btn-sm">New task</a>
-    <a href="?status=DONE" class="btn btn-primary btn-sm">Done</a>
-    <a href="?status=ON_PROCESS" class="btn btn-primary btn-sm">On process</a>
-    <a href="?status=EXPIRED" class="btn btn-primary btn-sm">Expierd</a>
-    <a href="?" class="btn btn-secondary btn-sm">נקה סינון</a>
+        main {
+            flex: 1;
+            padding-top: 80px;
+            padding: 2rem 1rem;
+        }
 
-</div>
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: slideDown 0.8s ease-out;
+        }
 
-<form method="GET" action="{% url 'team_management' %}">
-    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="חפש משתמש...">
-    <button type="submit" class="btn btn-secondary btn-sm">חפש</button>
+        .page-header h1 {
+            background: linear-gradient(135deg, #2563eb 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
 
-    {% if current_filter %}
-        <input type="hidden" name="status" value="{{ current_filter }}">
-    {% endif %}
-</form>
+        .page-header p {
+            background: linear-gradient(135deg, #06b6d4, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
 
+        .filters-card {
+            display: none;
+        }
 
-<h4>שם הצוות: {{ team.name }}</h4>
+        .tasks-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
 
-<table border="1" style="width:100%; border-collapse: collapse; text-align: right;">
-    <thead>
-    <tr>
-        <th>שם המשימה</th>
-        <th> תיאור</th>
-        <th>תאריך יעד</th>
-        <th>סטטוס</th>
-        <th>מבצע</th>
-        {% if user.role == "Manager" %}
-        <th>פעולות</th>
-        {% endif %}
-    </tr>
-    </thead>
-    <tbody>
-    {% for task in tasks %}
-    <tr>
-        <td>{{ task.name }}</td>
-        <td>{{ task.description }}</td>
-        <td>{{ task.end_date }}</td>
+        .task-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 248, 255, 0.98) 100%);
+            border-radius: 1.5rem;
+            border: 2px solid rgba(37, 99, 235, 0.2);
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.1);
+            transition: all 0.3s ease;
+            animation: slideUp 0.6s ease-out backwards;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
 
-        <td>
-            {{ task.status }}
-            {% if user.id == task.owner.id and task.status != "DONE"%}
-            <form action="{% url 'update_status' task.id %}" method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="user_id" value="{{ user.id }}">
-                <button type="submit" class="btn btn-primary btn-sm">
-                    עדכן סטטוס
-                </button>
-            </form>
-            {% endif %}
-        </td>
+        .task-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
 
-        {% if user.role == "Manager" and not task.owner.first_name%}
-        <td>
-            <form action="{% url 'update_owner' task.id %}" method="POST" class="d-flex gap-1">
-                {% csrf_token %}
-                <select name="user_id" class="form-select form-select-sm" style="width: auto;">
-                    <option value="">-- בחר עובד --</option>
-                    {% for member in users %}
-                    <option value="{{ member.id }}" {% if task.owner == member %} selected {% endif %}>
-                        {{ member.first_name }} {{ member.last_name }}
-                    </option>
+        .task-card:hover::before {
+            left: 100%;
+        }
+
+        .task-card:nth-child(1) { animation-delay: 0.05s; }
+        .task-card:nth-child(2) { animation-delay: 0.1s; }
+        .task-card:nth-child(3) { animation-delay: 0.15s; }
+        .task-card:nth-child(4) { animation-delay: 0.2s; }
+        .task-card:nth-child(5) { animation-delay: 0.25s; }
+        .task-card:nth-child(6) { animation-delay: 0.3s; }
+        .task-card:nth-child(7) { animation-delay: 0.35s; }
+        .task-card:nth-child(8) { animation-delay: 0.4s; }
+
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(37, 99, 235, 0.25);
+            border-color: rgba(37, 99, 235, 0.4);
+        }
+
+        .task-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2563eb 0%, #a855f7 100%);
+        }
+
+        .task-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: start;
+            gap: 0.5rem;
+        }
+
+        .task-description {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            background: #f1f5f9;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+        }
+
+        .meta-item i {
+            background: linear-gradient(135deg, #2563eb, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .task-status {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .status-new {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-on-process {
+            background: #fef08a;
+            color: #713f12;
+        }
+
+        .status-done {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-expired {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 0.5rem;
+<!--            margin-top: 1rem;-->
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+            margin-top: auto; /* זה הקסם - הוא דוחף את האלמנט הכי למטה שאפשר */
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 0.6rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-assign {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .btn-assign:hover {
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-complete {
+            background: linear-gradient(135deg, #a855f7, #9333ea);
+            color: white;
+        }
+
+        .btn-complete:hover {
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 248, 255, 0.98) 100%);
+            border-radius: 1.5rem;
+            border: 2px solid rgba(37, 99, 235, 0.2);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #2563eb 0%, #a855f7 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .empty-state h3 {
+            color: #64748b;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #94a3b8;
+        }
+
+        .team-info {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 248, 255, 0.98) 100%);
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: slideUp 0.8s ease-out 0.05s both;
+        }
+
+        .team-info-text h3 {
+            background: linear-gradient(135deg, #2563eb, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .team-members {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .member-badge {
+            background: linear-gradient(135deg, #2563eb 0%, #a855f7 100%);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .tasks-container {
+                grid-template-columns: 1fr;
+            }
+
+            .team-info {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .task-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include "components/NavBar.html" %}
+
+    <main class="container-fluid">
+        <div class="page-header">
+            <h1>
+                <i class="fas fa-check-double me-2"></i>
+                רשימת המשימות
+            </h1>
+            <p>ניהול משימות הצוות שלך</p>
+        </div>
+
+        <!-- Team Info -->
+        <div class="team-info">
+            <div class="team-info-text">
+                <h3><i class="fas fa-users me-2"></i>קבוצה: {{ team.team_name }}</h3>
+                <div class="team-members">
+                    {% for user in users %}
+                        <span class="member-badge">{{ user.first_name }} {{ user.last_name }}</span>
                     {% endfor %}
-                </select>
-                <button type="submit" class="btn btn-sm btn-primary">שייך</button>
-            </form>
-        </td>
-        {% elif not task.owner.first_name and task.status == 'EXPIRED'%}
-        <td> <div>'Not available</div></td>
+                </div>
+            </div>
+        </div>
 
+        <!-- Filters -->
+        <div class="filters-card">
+            <h3><i class="fas fa-filter me-2"></i>סינון משימות</h3>
+            <form method="get" class="filter-row">
+                <div class="filter-group">
+                    <label for="search">חיפוש לפי שם עובד:</label>
+                    <input type="text" id="search" name="q" placeholder="שם עובד..." value="{{ request.GET.q }}">
+                </div>
 
-        {% elif user.role == "TeamMember" and not task.owner.first_name%}
-        <td>
-            <form action="{% url 'update_owner' task.id %}" method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="user_id" value="{{ user.id }}">
-                <button type="submit" class="btn btn-primary btn-sm">
-                    שייך אלי
+                <div class="filter-group">
+                    <label for="status">סטטוס:</label>
+                    <select id="status" name="status">
+                        <option value="">הכל</option>
+                        <option value="NEW_TASK" {% if request.GET.status == 'NEW_TASK' %}selected{% endif %}>משימה חדשה</option>
+                        <option value="ON_PROCESS" {% if request.GET.status == 'ON_PROCESS' %}selected{% endif %}>בתהליך</option>
+                        <option value="DONE" {% if request.GET.status == 'DONE' %}selected{% endif %}>הושלמה</option>
+                        <option value="EXPIRED" {% if request.GET.status == 'EXPIRED' %}selected{% endif %}>פג תוקף</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-filter">
+                    <i class="fas fa-search me-1"></i> חפש
                 </button>
             </form>
-        </td>
+        </div>
 
+        <!-- Tasks Display -->
+        {% if tasks %}
+            <div class="tasks-container">
+                {% for task in tasks %}
+                    <div class="task-card">
+                        <h4 class="task-title">
+                            <i class="fas fa-tasks"></i>
+                            {{ task.name }}
+                        </h4>
+
+                        {% if task.description %}
+                            <p class="task-description">{{ task.description }}</p>
+                        {% endif %}
+
+                        <div class="task-status status-{{ task.status|lower }}">
+                            {% if task.status == 'NEW_TASK' %}
+                                <i class="fas fa-star me-1"></i> משימה חדשה
+                            {% elif task.status == 'ON_PROCESS' %}
+                                <i class="fas fa-hourglass-start me-1"></i> בתהליך
+                            {% elif task.status == 'DONE' %}
+                                <i class="fas fa-check-circle me-1"></i> הושלמה
+                            {% elif task.status == 'EXPIRED' %}
+                                <i class="fas fa-exclamation-circle me-1"></i> פג תוקף
+                            {% endif %}
+                        </div>
+
+                        <div class="task-meta">
+                            {% if task.owner %}
+                                <div class="meta-item">
+                                    <i class="fas fa-user"></i>
+                                    {{ task.owner.first_name }} {{ task.owner.last_name }}
+                                </div>
+                            {% else %}
+                                <div class="meta-item" style="background: #fef3c7; color: #92400e;">
+                                    <i class="fas fa-user-slash"></i>
+                                    <strong>לא משוייכת</strong>
+                                </div>
+                            {% endif %}
+
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                הגשה: {{ task.end_date|date:"d.m.Y" }}
+                            </div>
+                        </div>
+
+                        <!-- Manager Actions -->
+                        {% if user.role == 'Manager' %}
+                            <div class="task-actions">
+                                <!-- Edit Button - Only if task is not DONE and not EXPIRED -->
+                                {% if task.status == 'NEW_TASK' and task.status != 'EXPIRED' %}
+                                    <a href="{% url 'edit_task' task.id %}" class="btn-action btn-edit">
+                                        <i class="fas fa-edit"></i> ערוך
+                                    </a>
+                                {% else %}
+                                    <button class="btn-action" style="background: #e2e8f0; color: #94a3b8; cursor: not-allowed;" disabled title="{% if task.status != 'NEW_TASK' %}לא ניתן לערוך משימה שהושלמה{% else %}לא ניתן לערוך משימות שפג תוקפן{% endif %}">
+                                        <i class="fas fa-lock"></i> ערוך
+                                    </button>
+                                {% endif %}
+
+                                <!-- Delete Button - Always available for manager -->
+                                <form method="post" action="{% url 'delete_task' task.id %}" class="flex-grow-1" onsubmit="return confirm('האם אתה בטוח?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-action btn-delete" style="width: 100%;">
+                                        <i class="fas fa-trash"></i> מחק
+                                    </button>
+                                </form>
+
+                                <!-- Assign Button - Only if task has no owner and not expired -->
+                                {% if not task.owner and task.status != 'EXPIRED' %}
+                                    <form method="post" action="{% url 'update_owner' task.id %}" class="flex-grow-1">
+                                        {% csrf_token %}
+                                        <select name="user_id" onchange="this.form.submit();" style="padding: 0.6rem; border-radius: 0.5rem; border: none; background: linear-gradient(135deg, #10b981, #059669); color: white; font-weight: 600; cursor: pointer;">
+                                            <option value="" disabled selected>🔗 הקצה משימה</option>
+                                            {% for u in users %}
+                                                <option style="color: black;" value="{{ u.id }}">{{ u.first_name }} {{ u.last_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                {% else %}
+                                    <button class="btn-action" style="background: #e2e8f0; color: #94a3b8; cursor: not-allowed;" disabled title="{% if task.owner %}משימה כבר משוייכת{% else %}לא ניתן להקצות משימות שפג תוקפן{% endif %}">
+                                        <i class="fas fa-link"></i> משוייכת
+                                    </button>
+                                {% endif %}
+                            </div>
+
+                        <!-- Employee Actions -->
+                        {% else %}
+                            <div class="task-actions">
+                                <!-- Can only assign to self if: not assigned AND not expired -->
+                                {% if not task.owner and task.status != 'EXPIRED' %}
+                                    <form method="post" action="{% url 'update_owner' task.id %}" class="flex-grow-1">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                                        <button type="submit" class="btn-action btn-assign" style="width: 100%;">
+                                            <i class="fas fa-hand-holding-heart"></i> קח את המשימה
+                                        </button>
+                                    </form>
+                                <!-- If already assigned to this user and not done -->
+                                {% elif task.owner.id == user.id and task.status != 'DONE' %}
+                                    <form method="post" action="{% url 'update_status' task.id %}" style="flex: 1;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                                        <button type="submit" class="btn-action btn-complete" style="width: 100%;">
+                                            <i class="fas fa-check"></i> סמן כהושלם
+                                        </button>
+                                    </form>
+                                <!-- If already assigned to this user and done -->
+                                {% elif task.owner.id == user.id and task.status == 'DONE' %}
+                                    <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 0.6rem; border-radius: 0.5rem; text-align: center; font-weight: 600; flex: 1;">
+                                        <i class="fas fa-check-double"></i> משימה הושלמה
+                                    </div>
+                                <!-- Cannot assign - not owner -->
+                                {% elif not task.owner %}
+                                    <button class="btn-action" style="background: #e2e8f0; color: #94a3b8; cursor: not-allowed;" disabled title="משימה כבר משוייכת למישהו אחר">
+                                        <i class="fas fa-lock"></i> משוייכת
+                                    </button>
+                                <!-- Cannot assign - expired -->
+                                {% elif task.status == 'EXPIRED' %}
+                                    <button class="btn-action" style="background: #fee2e2; color: #991b1b; cursor: not-allowed;" disabled title="לא ניתן להקצות משימות שפג תוקפן">
+                                        <i class="fas fa-ban"></i> פג תוקף
+                                    </button>
+                                <!-- Not assigned and not expired but someone else owns it -->
+                                {% else %}
+                                    <button class="btn-action" style="background: #e2e8f0; color: #94a3b8; cursor: not-allowed;" disabled title="משימה זו הוקצתה למישהו אחר">
+                                        <i class="fas fa-lock"></i> לא זמינה
+                                    </button>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
         {% else %}
-        <td>{{ task.owner.first_name}}</td>
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>אין משימות להצגה</h3>
+                <p>
+                    {% if request.GET.q or request.GET.status %}
+                        אין משימות התואמות לסינון שלך
+                    {% else %}
+                        אין משימות עדיין בקבוצה זו
+                    {% endif %}
+                </p>
+            </div>
         {% endif %}
+    </main>
 
-
-        {% if user.role == "Manager" %}
-        <td>
-            <form action="{% url 'delete_task' task.id %}" method="POST">
-                {% csrf_token %}
-                <button type="submit" class="btn-delete"
-                        onclick="return confirm('האם את בטוחה שברצונך למחוק משימה זו?')">
-                    מחיקה
-                </button>
-
-            </form>
-            {% if user.role == "Manager" and not task.owner.first_name%}
-            <a href="{% url 'edit_task' task.id %}" class="btn-edit">ערוך </a>
-            {% endif %}
-        </td>
-        {% endif %}
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="{% if user.role == 'Manager' %}3{% else %}2{% endif %}" style="text-align:center;">
-            אין משימות להצגה לצוות זה
-        </td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

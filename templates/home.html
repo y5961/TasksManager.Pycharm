@@ -1,12 +1,338 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Whelcome</title>
-</head>
-<body>
-<h1>home_page</h1>
-    <a href="{% url 'sign_in'%}">Sign in</a>
-    <a href="{% url 'sign_up'%}">Sign up</a>
-</body>
-</html>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ברוכים הבאים - DoIt | מערכת ניהול משימות חכמה{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Smooth transitions */
+    html {
+        scroll-behavior: smooth;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ====================================
+     HERO SECTION - קטע ראשי
+     ==================================== -->
+<section class="welcome-section">
+    <div class="hero container">
+        <!-- Decorative Bubbles - בועות עיצוביות -->
+        <div class="accent-bubble bubble-1" aria-hidden="true"></div>
+        <div class="accent-bubble bubble-2" aria-hidden="true"></div>
+
+        <div class="row align-items-center g-5">
+            <!-- Left Content -->
+            <div class="col-lg-6 col-12">
+                <h1 class="hero-title fw-bold mb-4">
+                    🚀 ברוכים הבאים ל-<span class="text-gradient">DoIt</span>
+                </h1>
+
+                <p class="lead mb-4" style="color: #e0e7ff;">
+                    מערכת ניהול משימות חכמה, מהירה ומשתפת צוות —
+                    <br>
+                    <strong>התחל לנהל את היעדים שלך בדרך הנכונה!</strong>
+                </p>
+
+                <div class="features-list mb-4">
+                    <div class="feature-item mb-3 animate-slide-right" style="color: #e0e7ff;">
+                        <i class="fas fa-check-circle text-info me-3" style="font-size: 1.5rem;"></i>
+                        <span><strong>ניהול משימות מתקדם</strong> - ארגן את כל פרויקטיך בקלות</span>
+                    </div>
+                    <div class="feature-item mb-3 animate-slide-right" style="animation-delay: 0.1s; color: #e0e7ff;">
+                        <i class="fas fa-users text-success me-3" style="font-size: 1.5rem;"></i>
+                        <span><strong>שיתוף צוותים</strong> - עבודה משותפת בזמן אמת</span>
+                    </div>
+                    <div class="feature-item animate-slide-right" style="animation-delay: 0.2s; color: #e0e7ff;">
+                        <i class="fas fa-chart-line text-warning me-3" style="font-size: 1.5rem;"></i>
+                        <span><strong>מעקב התקדמות</strong> - צפה בהשגת היעדים בגרף מעניין</span>
+                    </div>
+                </div>
+
+                <div class="cta-buttons mt-5">
+                    <a href="{% url 'sign_up' %}" class="btn btn-primary btn-lg me-3 mb-2 animate-slide-up" style="animation-delay: 0.4s;">
+                        <i class="fas fa-user-plus me-2"></i>צור חשבון חדש
+                    </a>
+                    <a href="{% url 'sign_in' %}" class="btn btn-outline-secondary btn-lg mb-2 animate-slide-up" style="animation-delay: 0.5s;">
+                        <i class="fas fa-sign-in-alt me-2"></i>כניסה לחשבון קיים
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right - Hero Card with Logo -->
+            <div class="col-lg-6 col-12 d-flex justify-content-center align-items-center">
+                <div class="hero-card animate-slide-left" style="animation-delay: 0.3s;">
+                    <!-- <img src="{% static 'My-App/images/DoIt.gif' %}" alt="לוגו DoIt" class="hero-logo logo-gif glow mb-4"> -->
+
+                    <h3 class="mt-3 mb-3" style="color: white;">✨ התחל עכשיו</h3>
+                    <p class="mb-4 lh-lg" style="color: #e0e7ff;">
+                        הצטרף לאלפים של משתמשים שכבר מנהלים את המשימות שלהם בחכמה וביעילות עם <strong>DoIt</strong>.
+                    </p>
+
+                    <div class="stats-row">
+                        <div class="stat-item text-center">
+                            <h4 class="text-light fw-bold" style="font-size: 2.5rem;">2,847</h4>
+                            <p class="small text-light">משתמשים פעילים</p>
+                        </div>
+                        <div class="stat-item text-center">
+                            <h4 class="text-light fw-bold" style="font-size: 2.5rem;">14,392</h4>
+                            <p class="small text-light">משימות הושלמו</p>
+                        </div>
+                        <div class="stat-item text-center">
+                            <h4 class="text-light fw-bold" style="font-size: 2.5rem;">97.3%</h4>
+                            <p class="small text-light">שביעות רצון</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====================================
+     FEATURES SECTION - קטע התכונות
+     ==================================== -->
+<section class="features py-5 my-5">
+    <div class="container">
+        <div class="section-header text-center mb-5 animate-fade-in">
+            <h2 class="display-5 fw-bold mb-3">🎯 התכונות שלנו</h2>
+            <p class="lead text-muted">כל מה שאתה צריך כדי להיות מועיל וממוקד</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Feature 1 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card p-4 text-center animate-slide-up">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-bolt text-warning" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">⚡ מהירות וביעילות</h5>
+                    <p class="text-muted">
+                        יצירת משימות בשנייה, חלוקה לצוותים בקליק, וניהול זרם עבודה בזמן אמת.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card p-4 text-center animate-slide-up" style="animation-delay: 0.1s;">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-handshake text-info" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">👥 שיתוף וצוותים</h5>
+                    <p class="text-muted">
+                        שתף פרויקטים עם חבריך, הקצה משימות, וראה מי עובד על מה בזמן אמת.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card p-4 text-center animate-slide-up" style="animation-delay: 0.2s;">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-chart-pie text-success" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">📊 ניתוח והסתכלות</h5>
+                    <p class="text-muted">
+                        תרשימים וגרפים שמראים את ההתקדמות שלך, סטטוסים וזמנים משוער להשלמה.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card p-4 text-center animate-slide-up" style="animation-delay: 0.3s;">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-bell text-danger" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">🔔 הודעות וזכרונות</h5>
+                    <p class="text-muted">
+                        קבל התרעות על משימות קרובות, תזכורות בעת הקצאה, וסטטוסים של פרויקט.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card p-4 text-center animate-slide-up" style="animation-delay: 0.4s;">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-mobile-alt text-primary" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">📱 זמין בכל מקום</h5>
+                    <p class="text-muted">
+                        גש לאפליקציה שלנו מכל מכשיר - דסקטופ, טאבלט, או סמארטפון.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card p-4 text-center animate-slide-up" style="animation-delay: 0.5s;">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-shield-alt text-success" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">🔒 בטיחות מלאה</h5>
+                    <p class="text-muted">
+                        הנתונים שלך מוצפנים ומאובטחים בטכנולוגיה משכנע הענין, 100% פרטי.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====================================
+     CALL TO ACTION SECTION
+     ==================================== -->
+<section class="cta-section container-fluid py-5 my-5" style="margin-left: 0; margin-right: 0; padding: 5rem 2rem; background: linear-gradient(135deg, #2563eb 0%, #a855f7 50%, #4f46e5 100%);">
+    <div class="container text-center">
+        <h2 class="display-5 fw-bold text-white mb-3 animate-slide-down">
+            🌟 מוכן להתחיל?
+        </h2>
+        <p class="lead text-white" style="font-size: 1.25rem;">
+            הצטרף לקהילה שלנו והחל לנהל את המשימות שלך בדרך חכמה ויעילה
+        </p>
+        <div class="cta-buttons mt-4">
+            <a href="{% url 'sign_up' %}" class="btn btn-light btn-lg me-3 mb-2 fw-bold animate-bounce"
+               style="animation-delay: 0s;">
+                <i class="fas fa-rocket me-2"></i>צור חשבון בחינם
+            </a>
+            <a href="{% url 'sign_in' %}" class="btn btn-outline-light btn-lg mb-2 fw-bold animate-bounce"
+               style="animation-delay: 0.2s;">
+                <i class="fas fa-arrow-right me-2"></i>כניסה
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ====================================
+     TESTIMONIALS SECTION (Optional)
+     ==================================== -->
+<section class="testimonials py-5 my-5">
+    <div class="container">
+        <div class="section-header text-center mb-5 animate-fade-in">
+            <h2 class="display-5 fw-bold mb-3">💬 מה אומרים עלינו</h2>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="testimonial-card card p-4 animate-slide-up">
+                    <div class="stars mb-3">
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                    </div>
+                    <p class="text-muted mb-3 lh-lg">
+                        "DoIt שינה את אופן הניהול שלי של פרויקטים. זה כל כך קל ואינטואיטיבי!"
+                    </p>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <strong>א</strong>
+                        </div>
+                        <div>
+                            <p class="mb-0 fw-bold">אלכס כהן</p>
+                            <p class="small text-muted mb-0">מנהל פרויקטים</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="testimonial-card card p-4 animate-slide-up" style="animation-delay: 0.1s;">
+                    <div class="stars mb-3">
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                    </div>
+                    <p class="text-muted mb-3 lh-lg">
+                        "הצוות שלי ו-DoIt הן זוג מושלם. ההודעות בזמן אמת חוסכות לי שעות כל שבוע."
+                    </p>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <strong>ש</strong>
+                        </div>
+                        <div>
+                            <p class="mb-0 fw-bold">שרה לוי</p>
+                            <p class="small text-muted mb-0">מעצבת UX</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="testimonial-card card p-4 animate-slide-up" style="animation-delay: 0.2s;">
+                    <div class="stars mb-3">
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                    </div>
+                    <p class="text-muted mb-3 lh-lg">
+                        "עם DoIt, הצוות שלי כמעט הכפיל את הפרודוקטיביות שלו. מחויב לנצח!"
+                    </p>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <strong>ד</strong>
+                        </div>
+                        <div>
+                            <p class="mb-0 fw-bold">דוד רוז</p>
+                            <p class="small text-muted mb-0">מנכ"ל סטרטאפ</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====================================
+     FINAL CTA SECTION
+     ==================================== -->
+<section class="final-cta py-5 text-center" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%); border-radius: 1.5rem; margin: 5rem 2rem;">
+    <div class="container">
+        <h3 class="display-6 fw-bold mb-3 text-gradient animate-slide-down">
+            אל תחכה יותר מידי! 🚀
+        </h3>
+        <p class="lead text-muted mb-4">
+            הצטרף ל-DoIt ותחזור לחיים שלך בשליטה מלאה על כל המשימות שלך
+        </p>
+        <a href="{% url 'sign_up' %}" class="btn btn-primary btn-lg fw-bold animate-pulse">
+            <i class="fas fa-user-plus me-2"></i>צור חשבון חדש בחינם
+        </a>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize animations on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add fade-in animation to all elements with data-animate
+        document.querySelectorAll('[data-animate]').forEach((el, index) => {
+            el.style.animationDelay = (index * 0.1) + 's';
+        });
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if(href !== '#') {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if(target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
