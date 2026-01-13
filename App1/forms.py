@@ -1,7 +1,13 @@
 from django import forms
 from .models import User, Team, Task
 
+
 class SignUpForm(forms.ModelForm):
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("A user with this email already exists.")
+        return email
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'password', 'role']
@@ -29,6 +35,7 @@ class SignUpForm(forms.ModelForm):
             raise forms.ValidationError("Should contain only letters")
         return lname
 
+
 class SignInForm(forms.ModelForm):
     class Meta:
         model = User
@@ -38,11 +45,13 @@ class SignInForm(forms.ModelForm):
             "email": "Email address",
         }
 
+
 class AddTeamForm(forms.ModelForm):
     class Meta:
         model = Team
         fields = ['name']
         labels = {'name': 'Name of the new team'}
+
 
 class JoinTeamForm(forms.ModelForm):
     team = forms.ModelChoiceField(
@@ -55,6 +64,7 @@ class JoinTeamForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['team']  # הגדרה יחידה ותקינה של Meta
+
 
 class AddTaskForm(forms.ModelForm):
     class Meta:

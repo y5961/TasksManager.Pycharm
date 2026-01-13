@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -103,7 +104,7 @@ def create_team(request):
     if request.user.is_authenticated:
         return redirect('team_management')
     User = get_user_model()
-    user_data = request.session.get['temp_user_data']
+    user_data = request.session['temp_user_data']
 
     if not user_data:
         return redirect('sign_up')
@@ -133,6 +134,7 @@ def create_team(request):
             except Exception as e:
                 # אם קרתה תקלה כלשהי, שום דבר לא יישמר ב-DB
                 form.add_error(None, "error, try again!!")
+
     else:
         form = AddTeamForm()
     return render(request, 'teams/manage/create_team.html', {'form': form})
@@ -153,7 +155,10 @@ def team_management(request):
     query = request.GET.get('q')
 
     if query:
-        tasks = tasks.filter(owner__first_name__icontains=query)
+        tasks = Task.objects.filter(
+            Q(owner__first_name__icontains=query) |
+            Q(owner__last_name__icontains=query)
+        )
 
     context = {
         'tasks': tasks,
