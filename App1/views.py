@@ -57,7 +57,7 @@ def select_team(request):
     if request.user.is_authenticated:
         return redirect('team_management')
     User = get_user_model()
-    # 1. שליפת הנתונים מהסשן כבר בהתחלה
+
     user_data = request.session.get('temp_user_data')
     teams = Team.objects.all()
     # 2. הגנה: אם המשתמש הגיע לדף בלי לעבור ב-Sign Up
@@ -88,7 +88,7 @@ def select_team(request):
                     request.session.pop('temp_user_data', None)
                     login(request, user)
 
-                    return redirect('team_management')  # ודאי שזה תואם לשם ה-URL שלך
+                    return redirect('team_management')
 
             except Exception as e:
                 form.add_error(None, f"אירעה שגיאה בתהליך הרישום: {str(e)}")
@@ -103,7 +103,7 @@ def create_team(request):
     if request.user.is_authenticated:
         return redirect('team_management')
     User = get_user_model()
-    user_data = request.session['temp_user_data']
+    user_data = request.session.get['temp_user_data']
 
     if not user_data:
         return redirect('sign_up')
@@ -127,8 +127,8 @@ def create_team(request):
                         role=user_data['role'],
                         team=new_team
                     )
-                    del request.session['temp_user_data']
                     login(request, user)
+                    request.session.pop('temp_user_data', None)
                     return redirect('team_management')
             except Exception as e:
                 # אם קרתה תקלה כלשהי, שום דבר לא יישמר ב-DB
@@ -144,18 +144,15 @@ def team_management(request):
     team = request.user.team
     status_filter = request.GET.get('status')
     if status_filter: tasks = tasks.filter(status=status_filter)
-
     now = timezone.now().date()
-
     for task in tasks:
         if task.end_date < now and task.status != 'EXPIRED' and task.status != 'DONE':
             task.status = 'EXPIRED'
             task.save()
 
-    query = request.GET.get('q')  # כאן אנחנו תופסים את מה שהמשתמש כתב
+    query = request.GET.get('q')
 
     if query:
-        # מסנן לפי שם פרטי או שם משפחה של המבצע
         tasks = tasks.filter(owner__first_name__icontains=query)
 
     context = {
@@ -165,10 +162,6 @@ def team_management(request):
     }
 
     return render(request, 'teams/team_management.html', context)
-
-
-def assign_tasks(request):
-    return render(request, 'teams/manage/assign_tasks.html')
 
 
 @login_required
@@ -189,7 +182,6 @@ def add_task(request):
 
     return render(request, 'teams/manage/add_task.html', {'form': form})
 
-
 @login_required
 def delete_task(request, task_id):
     if request.user.role != 'Manager':
@@ -200,7 +192,7 @@ def delete_task(request, task_id):
         task.delete()
         return redirect('team_management')
 
-
+@login_required
 def edit_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     if request.user.role != 'Manager':
